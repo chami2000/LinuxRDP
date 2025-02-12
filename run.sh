@@ -35,6 +35,54 @@ setup_storage() {
     mount --bind /storage /home/"$username"/storage
 }
 
+# Function to install 64Gram Telegram
+install_telegram() {
+    local username="$1"
+    echo "Installing 64Gram Telegram"
+    
+    # Install required dependencies
+    apt install --assume-yes unzip wget
+
+    # Create Applications directory if it doesn't exist
+    mkdir -p /home/"$username"/.local/share/applications
+    mkdir -p /home/"$username"/Applications
+
+    # Download and setup 64Gram
+    cd /home/"$username"/Applications
+    wget https://github.com/TDesktop-x64/tdesktop/releases/download/v1.1.58/64Gram_1.1.58_linux.zip
+    unzip 64Gram_1.1.58_linux.zip
+    rm 64Gram_1.1.58_linux.zip
+    
+    # Make files executable
+    chmod +x Telegram
+    chmod +x Updater
+
+    # Create desktop shortcut
+    cat > /home/"$username"/Desktop/64Gram.desktop << EOF
+[Desktop Entry]
+Version=1.0
+Name=64Gram
+Comment=Telegram Desktop Client
+Exec=/home/$username/Applications/Telegram
+Icon=telegram
+Terminal=false
+Type=Application
+Categories=Network;InstantMessaging;
+EOF
+
+    # Also add to system applications
+    cp /home/"$username"/Desktop/64Gram.desktop /home/"$username"/.local/share/applications/
+
+    # Set proper permissions
+    chmod +x /home/"$username"/Desktop/64Gram.desktop
+    chmod +x /home/"$username"/.local/share/applications/64Gram.desktop
+    chown -R "$username":"$username" /home/"$username"/Applications
+    chown "$username":"$username" /home/"$username"/Desktop/64Gram.desktop
+    chown "$username":"$username" /home/"$username"/.local/share/applications/64Gram.desktop
+
+    echo "64Gram Telegram has been installed and desktop shortcut created"
+}
+
 # Function to install and configure RDP
 setup_rdp() {
     echo "Installing Firefox ESR"
@@ -82,6 +130,7 @@ fi
 
 create_user
 setup_rdp
+install_telegram "$username"
 
 echo "Setup completed. Please check the individual function outputs for access information."
 
